@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -9,13 +10,44 @@ import {
 } from 'react-native';
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/AntDesign';
+import axios from 'axios';
 
 export default function Search() {
-  const [email, SetEmail] = useState('');
-  const [password, SetPassword] = useState('');
+  const [email, SetEmail] = useState('testpracticaluser001@mailinator.com');
+  const [password, SetPassword] = useState('Test@123');
+
+  let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: 'http://3.7.81.243/projects/plie-api/public/api/login',
+    data: {email: email, password: password},
+  };
 
   const handleClick = () => {
-    console.log(email, password);
+    if (email != '' && password != '') {
+      axios
+        .request(config)
+        .then(async response => {
+          if (response.data?.success == true) {
+            try {
+              await AsyncStorage.setItem('isLogin', true);
+              await AsyncStorage.setItem(
+                'Token',
+                response?.data?.data?.token || null,
+              );
+            } catch (error) {
+              Alert.alert('async save error', error.message);
+            }
+          } else {
+            Alert.alert('Login Error!', response.data?.message);
+          }
+        })
+        .catch(error => {
+          Alert.alert('Login Error!', error.message);
+        });
+    } else {
+      Alert.alert('All Fields Are Require');
+    }
   };
 
   return (
