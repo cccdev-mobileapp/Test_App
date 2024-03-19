@@ -8,6 +8,8 @@ import Profile from '../screens/Profile';
 import Login from '../screens/Login';
 import AppContext from '../context/AppContext';
 
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 export default function Routes() {
   const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
@@ -17,8 +19,33 @@ export default function Routes() {
   function MyTabs() {
     return (
       <Tab.Navigator
-        initialRouteName="Events"
-        screenOptions={{headerShown: false}}>
+        screenOptions={({route}) => ({
+          tabBarIcon: ({focused, size, color}) => {
+            let iconNmae;
+            if (route.name === 'Search') {
+              iconNmae = focused ? 'home' : 'home-outline';
+              size = focused ? 25 : 20;
+              color = focused ? '#de3434' : '#555';
+            } else if (route.name === 'Events') {
+              iconNmae = focused ? 'calendar-sharp' : 'calendar-outline';
+              size = focused ? 25 : 20;
+              color = focused ? '#de3434' : '#555';
+            } else if (route.name === 'Favourites') {
+              iconNmae = focused ? 'heart' : 'heart-outline';
+              size = focused ? 25 : 20;
+              color = focused ? '#de3434' : '#555';
+            } else if (route.name === 'Profile') {
+              iconNmae = focused
+                ? 'person-circle-sharp'
+                : 'person-circle-outline';
+              size = focused ? 25 : 20;
+              color = focused ? '#de3434' : '#555';
+            }
+            return <Ionicons name={iconNmae} size={size} color={color} />;
+          },
+          headerShown: false,
+          activeTintColor: '#de3434',
+        })}>
         <Tab.Screen name="Search" component={Search} />
         <Tab.Screen name="Events" component={Events} />
         <Tab.Screen name="Favourites" component={Favourites} />

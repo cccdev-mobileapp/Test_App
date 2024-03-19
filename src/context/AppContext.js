@@ -7,7 +7,7 @@ const AppContext = React.createContext();
 export const AppProvider = ({children}) => {
   const [isLogin, setLogin] = useState(false);
   const [token, setToken] = useState(null);
-  const [Data, setData] = useState([]);
+  const [data, setData] = useState([]);
 
   const GetData = async () => {
     try {
@@ -36,7 +36,7 @@ export const AppProvider = ({children}) => {
 
   return (
     <AppContext.Provider
-      value={{isLogin, setLogin, token, setToken, Data, setData}}>
+      value={{isLogin, setLogin, token, setToken, data, setData}}>
       {children}
     </AppContext.Provider>
   );

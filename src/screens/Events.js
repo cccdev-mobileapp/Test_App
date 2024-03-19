@@ -1,13 +1,23 @@
-import {StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useState, useContext} from 'react';
+import {
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import React, {useEffect, useState, useContext, useCallback} from 'react';
 import Header from '../components/Header';
 import axios from 'axios';
 import AppContext from '../context/AppContext';
+import Loader from '../components/Loader';
+import NoData from '../components/NoData';
+import ReduceData from '../components/ReduceData';
 
 export default function Events() {
-  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [data, setData] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const {token} = useContext(AppContext);
 
   let config = {
@@ -19,14 +29,21 @@ export default function Events() {
     },
   };
 
-  const callApi = () => {
-    axios
+  const callApi = async () => {
+    setLoading(true);
+    await axios
       .request(config)
       .then(response => {
-        console.log(JSON.stringify(response.data));
+        if (response.data?.success == true) {
+          setLoading(false);
+          setData(response?.data?.data?.events || []);
+        } else {
+          Alert.alert('Data Get Error!', response.data?.message);
+        }
       })
       .catch(error => {
-        console.log(error);
+        Alert.alert('Data Get Error!', error?.message);
+        setLoading(false);
       });
   };
 
@@ -34,10 +51,31 @@ export default function Events() {
     callApi();
   }, []);
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    callApi();
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
+
   return (
     <View style={{flex: 1}}>
       <Header />
-      <Text>Events</Text>
+      {loading && !refreshing ? (
+        <Loader />
+      ) : data.length == 0 ? (
+        <NoData onClick={callApi} />
+      ) : (
+        <FlatList
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          data={data}
+          renderItem={({item}) => <ReduceData data={item} />}
+          keyExtractor={(item, index) => index}
+        />
+      )}
     </View>
   );
 }
